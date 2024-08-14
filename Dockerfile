@@ -11,7 +11,8 @@ RUN apt-get update && apt-get install -y \
     && tar xvf apache-tomcat-7.0.42.tar.gz \
     && mv apache-tomcat-7.0.42 /opt/tomcat \
     && rm apache-tomcat-7.0.42.tar.gz \
-    && mkdir /docker-entrypoint-initdb.d
+    && mkdir /docker-entrypoint-initdb.d \
+    && mkdir /var/lib/mysql-files
 
 # Set environment variables for JDK and Tomcat
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -30,8 +31,8 @@ EXPOSE 8080
 # Initialize MySQL and start Tomcat
 CMD ["bash", "-c", "\
     service mysql start && \
+    mysql -u root -e 'ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY \"root\";' && \
     sleep 10 && \
-    mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'root';\" && \
     mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS evm_db;' && \
     mysql -u root -proot evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
     catalina.sh run"]
