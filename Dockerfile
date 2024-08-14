@@ -11,8 +11,7 @@ RUN apt-get update && apt-get install -y \
     && tar xvf apache-tomcat-7.0.42.tar.gz \
     && mv apache-tomcat-7.0.42 /opt/tomcat \
     && rm apache-tomcat-7.0.42.tar.gz \
-    && mkdir /docker-entrypoint-initdb.d \
-    && mkdir /var/lib/mysql-files
+    && mkdir -p /docker-entrypoint-initdb.d
 
 # Set environment variables for JDK and Tomcat
 ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
@@ -28,7 +27,7 @@ COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 # Expose Tomcat port
 EXPOSE 8080
 
-# Initialize MySQL and start Tomcat
+# Start MySQL, initialize the database, and run Tomcat
 CMD ["bash", "-c", "\
     service mysql start && \
     mysql -u root -e 'ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY \"root\";' && \
