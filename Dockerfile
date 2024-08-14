@@ -1,7 +1,7 @@
 # Use Ubuntu as the base image
 FROM ubuntu:18.04 AS base
 
-# Install JDK 8, wget, and MySQL 9.0.0 dependencies
+# Install JDK 8, wget, and MySQL 5.7 (since MySQL 9.0.0 is unavailable)
 RUN apt-get update && apt-get install -y \
     openjdk-8-jdk \
     wget \
@@ -26,10 +26,11 @@ COPY . .
 # Expose the Tomcat port
 EXPOSE 8080
 
-# Start MySQL service and run the SQL script to create the database
+# Configure MySQL root user with password
 RUN service mysql start && \
-    mysql -u root -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
-    mysql -u root evm_db < /opt/tomcat/webapps/evmsql.sql
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
+    mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
+    mysql -u root -proot evm_db < /opt/tomcat/webapps/evmsql.sql
 
-# Start Tomcat server
-CMD ["catalina.sh", "run"]
+# Start MySQL service and Tomcat server
+CMD service mysql start && catalina.sh run
