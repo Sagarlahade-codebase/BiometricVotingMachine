@@ -17,6 +17,9 @@ ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 ENV CATALINA_HOME=/opt/tomcat
 ENV PATH=$JAVA_HOME/bin:$CATALINA_HOME/bin:$PATH
 
+# Set the working directory to Tomcat's webapps directory
+WORKDIR /opt/tomcat/webapps
+
 # Copy the WAR file to Tomcat's webapps directory
 COPY bbb.war /opt/tomcat/webapps/ROOT.war
 
@@ -26,9 +29,8 @@ COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 # Expose Tomcat port
 EXPOSE 8080
 
-# Initialize MySQL and start Tomcat
+# Start MySQL, initialize the database, and run Tomcat
 CMD service mysql start && \
-    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
     mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
     mysql -u root -proot evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
     catalina.sh run
