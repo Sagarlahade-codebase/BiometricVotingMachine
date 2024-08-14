@@ -20,17 +20,22 @@ ENV PATH=$JAVA_HOME/bin:$CATALINA_HOME/bin:$PATH
 # Set the working directory to Tomcat's webapps directory
 WORKDIR /opt/tomcat/webapps
 
-# Copy your J2EE project files to the Tomcat webapps directory
+# Copy your J2EE project files and the SQL script to the container
 COPY . .
+
+# Ensure MySQL service is configured with root password
+RUN service mysql start && \
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
 
 # Expose the Tomcat port
 EXPOSE 8080
 
-# Configure MySQL root user with password
-RUN service mysql start && \
-    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
-    mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
-    mysql -u root -proot evm_db < /opt/tomcat/webapps/evmsql.sql
+# Copy the SQL script to the correct location
+COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 
-# Start MySQL service and Tomcat server
-CMD service mysql start && catalina.sh run
+# Start MySQL, initialize the database, and run Tomcat
+CMD mysqld_safe --skip-grant-tables & \
+    sleep 10 && \
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
+    mysql -u root evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
+    catalina.sh run
