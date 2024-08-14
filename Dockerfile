@@ -23,15 +23,19 @@ WORKDIR /opt/tomcat/webapps
 # Copy your WAR file into Tomcat's webapps directory
 COPY bbb.war /opt/tomcat/webapps/ROOT.war
 
+# Ensure MySQL service is configured with root password
+RUN service mysql start && \
+    mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';"
+
 # Copy the SQL script to the Docker image
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 
 # Expose Tomcat port
 EXPOSE 8080
 
-# Initialize MySQL database and start Tomcat
-CMD service mysql start && \
-    mysql -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
+# Start MySQL, initialize the database, and run Tomcat
+CMD mysqld_safe --skip-grant-tables & \
+    sleep 10 && \
     mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS evm_db;" && \
     mysql -u root -proot evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
     catalina.sh run
