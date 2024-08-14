@@ -31,6 +31,7 @@ EXPOSE 8080
 CMD ["bash", "-c", "\
     service mysql start && \
     sleep 10 && \
+    mysql -u root -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY 'root';\" && \
     mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS evm_db;' && \
     mysql -u root -proot evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
     catalina.sh run"]
