@@ -15,12 +15,13 @@ RUN apt-get update && \
     mv apache-tomcat-7.0.42 /opt/tomcat && \
     rm apache-tomcat-7.0.42.tar.gz
 
-# Configure MySQL with higher timeouts
+# Configure MySQL with higher timeouts and bind-address
 RUN echo "[mysqld]\n" \
          "wait_timeout=28800\n" \
          "interactive_timeout=28800\n" \
          "max_allowed_packet=64M\n" \
          "innodb_lock_wait_timeout=500\n" \
+         "bind-address=0.0.0.0\n" \
          > /etc/mysql/mysql.conf.d/mysqld.cnf
 
 # Remove default Tomcat applications
