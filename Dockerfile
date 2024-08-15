@@ -1,37 +1,31 @@
 # Use Ubuntu as the base image
-FROM ubuntu:18.04
+FROM ubuntu:20.04
 
-# Install JDK 8, wget, MySQL 5.7, and required tools
-RUN apt-get update && apt-get install -y \
-    openjdk-8-jdk \
-    wget \
-    mysql-server-5.7 \
-    mysql-client \
-    && wget https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.42/bin/apache-tomcat-7.0.42.tar.gz \
-    && tar xvf apache-tomcat-7.0.42.tar.gz \
-    && mv apache-tomcat-7.0.42 /opt/tomcat \
-    && rm apache-tomcat-7.0.42.tar.gz \
-    && mkdir -p /docker-entrypoint-initdb.d
+# Set environment variables for non-interactive installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set environment variables for JDK and Tomcat
-ENV JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-ENV CATALINA_HOME=/opt/tomcat
-ENV PATH=$JAVA_HOME/bin:$CATALINA_HOME/bin:$PATH
+# Install JDK 8, Tomcat 7.0.42, and MySQL
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk wget mysql-server && \
+    wget https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.42/bin/apache-tomcat-7.0.42.tar.gz && \
+    tar -xvzf apache-tomcat-7.0.42.tar.gz && \
+    mv apache-tomcat-7.0.42 /opt/tomcat && \
+    rm apache-tomcat-7.0.42.tar.gz
 
-# Copy the WAR file to Tomcat's webapps directory
-COPY bbb.war /opt/tomcat/webapps/ROOT.war
+# Set environment variables for Tomcat and MySQL
+ENV CATALINA_HOME /opt/tomcat
+ENV PATH $CATALINA_HOME/bin:$PATH
 
-# Copy the SQL script to the Docker image
+# Copy the WAR file into Tomcat's webapps directory
+COPY path/to/your/app.war $CATALINA_HOME/webapps/app.war
+
+# Copy your SQL script to the container
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 
-# Expose Tomcat port
-EXPOSE 8080
+# Expose ports for Tomcat and MySQL
+EXPOSE 8080 3306
 
-# Initialize MySQL and start Tomcat using ENTRYPOINT
-ENTRYPOINT ["bash", "-c", "\
-    service mysql start && \
-    mysql -u root -e 'ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY \"root\";' && \
-    sleep 10 && \
-    mysql -u root -proot -e 'CREATE DATABASE IF NOT EXISTS evm_db;' && \
-    mysql -u root -proot evm_db < /docker-entrypoint-initdb.d/evmsql.sql && \
-    catalina.sh run"]
+# Start MySQL and Tomcat
+CMD service mysql start && \
+    mysql -u root -e "source /docker-entrypoint-initdb.d/evmsql.sql" && \
+    $CATALINA_HOME/bin/catalina.sh run
