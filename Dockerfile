@@ -13,7 +13,8 @@ RUN apt-get update && \
     wget https://archive.apache.org/dist/tomcat/tomcat-7/v7.0.42/bin/apache-tomcat-7.0.42.tar.gz && \
     tar -xvzf apache-tomcat-7.0.42.tar.gz && \
     mv apache-tomcat-7.0.42 /opt/tomcat && \
-    rm apache-tomcat-7.0.42.tar.gz
+    rm apache-tomcat-7.0.42.tar.gz && \
+    apt-get clean
 
 # Configure MySQL with higher timeouts and bind-address
 RUN echo "[mysqld]\n" \
@@ -46,8 +47,9 @@ RUN sed -i '/<Connector port="8080"/ { \
 # Expose ports for Tomcat and MySQL
 EXPOSE 8080 3306
 
-# Start MySQL, apply timeouts, run the SQL script, and start Tomcat
+# Start MySQL, wait for it to be ready, apply SQL script, and start Tomcat
 CMD service mysql start && \
-    mysql -u root -proot -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
-    mysql -u root -proot -e "source /docker-entrypoint-initdb.d/evmsql.sql" && \
+    sleep 20 && \
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" < /docker-entrypoint-initdb.d/evmsql.sql && \
     $CATALINA_HOME/bin/catalina.sh run
