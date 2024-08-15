@@ -58,6 +58,8 @@ public class LoginServlet extends HttpServlet {
 			}else{
 				
 				request.setAttribute("msg", "Login Un..Successfull");
+				request.setAttribute("message", "Login Un..Successfull");
+
 				request.getRequestDispatcher("login.jsp").forward(request, response);
 				
 				
