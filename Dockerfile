@@ -16,8 +16,14 @@ RUN apt-get update && \
 ENV CATALINA_HOME /opt/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 
-# Copy the WAR file into Tomcat's webapps directory
-COPY bbb.war $CATALINA_HOME/webapps/app.war
+# Remove default Tomcat applications
+RUN rm -rf $CATALINA_HOME/webapps/ROOT && \
+    rm -rf $CATALINA_HOME/webapps/examples && \
+    rm -rf $CATALINA_HOME/webapps/docs && \
+    rm -rf $CATALINA_HOME/webapps/manager
+
+# Copy your WAR file as ROOT.war for deployment at the root context
+COPY bbb.war $CATALINA_HOME/webapps/ROOT.war
 
 # Copy your SQL script to the container
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
