@@ -9,7 +9,7 @@ import java.sql.SQLException;
 public class Database {
 
 	public static String DriverString="com.mysql.cj.jdbc.Driver";
-	public static String url="jdbc:mysql://localhost:3306/evoting";
+	public static String url="jdbc:mysql://localhost:3306/evoting?connectTimeout=50000&socketTimeout=50000&autoReconnect=true";
 	public static String username="root";
 	public static String password="root";
 	public static Connection conn;
