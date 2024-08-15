@@ -24,7 +24,7 @@ RUN rm -rf $CATALINA_HOME/webapps/ROOT && \
     rm -rf $CATALINA_HOME/webapps/manager
 
 # Copy your WAR file as ROOT.war for deployment at the root context
-COPY bbb.war $CATALINA_HOME/webapps/ROOT.war
+COPY bbbb.war $CATALINA_HOME/webapps/ROOT.war
 
 # Copy your SQL script to the container
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
