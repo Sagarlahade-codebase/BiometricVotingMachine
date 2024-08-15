@@ -27,8 +27,8 @@ COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 # Expose Tomcat port
 EXPOSE 8080
 
-# Start MySQL, initialize the database, and run Tomcat
-CMD ["bash", "-c", "\
+# Initialize MySQL and start Tomcat using ENTRYPOINT
+ENTRYPOINT ["bash", "-c", "\
     service mysql start && \
     mysql -u root -e 'ALTER USER root@localhost IDENTIFIED WITH mysql_native_password BY \"root\";' && \
     sleep 10 && \
