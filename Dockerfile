@@ -46,10 +46,3 @@ RUN sed -i '/<Connector port="8080"/ { \
 
 # Expose ports for Tomcat and MySQL
 EXPOSE 8080 3306
-
-# Start MySQL, wait for it to be ready, apply SQL script, and start Tomcat
-CMD service mysql start && \
-    sleep 20 && \
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root';" && \
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" < /docker-entrypoint-initdb.d/evmsql.sql && \
-    $CATALINA_HOME/bin/catalina.sh run
