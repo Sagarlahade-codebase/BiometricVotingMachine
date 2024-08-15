@@ -35,8 +35,12 @@ COPY bbbbb.war $CATALINA_HOME/webapps/ROOT.war
 # Copy your SQL script to the container
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
 
-# Configure Tomcat to increase connection timeout and handle long-running requests
-RUN sed -i '/<Connector port="8080"/a\ \ \ \ connectionTimeout="20000"' $CATALINA_HOME/conf/server.xml
+# Safely set or update connectionTimeout in server.xml
+RUN sed -i '/<Connector port="8080"/ { \
+    s/connectionTimeout="[0-9]*"/connectionTimeout="20000"/; \
+    t; \
+    s/>/ connectionTimeout="20000">/; \
+}' $CATALINA_HOME/conf/server.xml
 
 # Expose ports for Tomcat and MySQL
 EXPOSE 8080 3306
