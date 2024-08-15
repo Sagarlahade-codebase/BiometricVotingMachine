@@ -45,4 +45,4 @@ RUN sed -i '/<Connector port="8080"/ { \
 }' $CATALINA_HOME/conf/server.xml
 
 # Expose ports for Tomcat and MySQL
-#EXPOSE 8080 3306
+EXPOSE 8080 3306
