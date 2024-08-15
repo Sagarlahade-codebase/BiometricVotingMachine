@@ -17,7 +17,7 @@ ENV CATALINA_HOME /opt/tomcat
 ENV PATH $CATALINA_HOME/bin:$PATH
 
 # Copy the WAR file into Tomcat's webapps directory
-COPY path/to/your/app.war $CATALINA_HOME/webapps/app.war
+COPY bbb.war $CATALINA_HOME/webapps/app.war
 
 # Copy your SQL script to the container
 COPY evmsql.sql /docker-entrypoint-initdb.d/evmsql.sql
